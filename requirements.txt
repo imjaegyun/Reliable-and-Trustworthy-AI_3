@@ -1,0 +1,3 @@
+maraboupy>=2.0.0
+numpy>=1.23
+

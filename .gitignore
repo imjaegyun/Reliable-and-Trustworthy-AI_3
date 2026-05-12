@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+marabou.log
+results/*.json
+results/*.txt
+!results/.gitkeep
+assignment3.pdf

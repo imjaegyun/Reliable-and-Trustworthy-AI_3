@@ -1,0 +1,23 @@
+// Tiny Iris two-feature classifier for Marabou Assignment 3.
+// Inputs are normalized petal_length and petal_width from the Iris dataset.
+// Architecture: 2 inputs -> 3 ReLU hidden units -> 3 linear class logits.
+2,2,3,3,
+2,3,3,
+0,
+0.0,0.0,
+1.0,1.0,
+0.0,0.0,0.0,
+1.0,1.0,1.0,
+1.0,0.0,
+0.0,1.0,
+1.0,1.0,
+0.0,
+0.0,
+-0.55,
+-3.0,-3.0,0.0,
+2.0,1.0,-2.0,
+1.0,3.0,3.0,
+2.0,
+0.2,
+-1.0,
+
