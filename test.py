@@ -9,10 +9,11 @@ as large as the Setosa logit.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, NamedTuple
 
 import numpy as np
 
@@ -27,9 +28,58 @@ except ImportError as exc:  # pragma: no cover - exercised only without setup
 
 ROOT = Path(__file__).resolve().parent
 MODEL_PATH = ROOT / "models" / "iris_tiny.nnet"
+DATASET_PATH = ROOT / "data" / "iris.csv"
 RESULTS_PATH = ROOT / "results" / "verification_result.json"
 CLASS_NAMES = ["setosa", "versicolor", "virginica"]
-SETOSA_SAMPLE = np.array([0.0677966102, 0.0416666667], dtype=float)
+
+
+class IrisRow(NamedTuple):
+    sepal_length: float
+    sepal_width: float
+    petal_length: float
+    petal_width: float
+    species: str
+
+
+def load_iris_dataset(path: Path) -> List[IrisRow]:
+    """Load the full UCI Iris CSV file bundled in data/iris.csv."""
+    rows: List[IrisRow] = []
+    with path.open(newline="", encoding="utf-8") as csv_file:
+        for raw in csv.reader(csv_file):
+            if not raw:
+                continue
+            if len(raw) != 5:
+                raise ValueError(f"Expected 5 columns in {path}, got {raw!r}")
+            rows.append(
+                IrisRow(
+                    sepal_length=float(raw[0]),
+                    sepal_width=float(raw[1]),
+                    petal_length=float(raw[2]),
+                    petal_width=float(raw[3]),
+                    species=raw[4].replace("Iris-", "").lower(),
+                )
+            )
+    if not rows:
+        raise ValueError(f"No Iris rows found in {path}")
+    return rows
+
+
+def normalized_petal_features(rows: List[IrisRow], species: str) -> np.ndarray:
+    """Return normalized [petal_length, petal_width] for the first row of a species."""
+    petal_lengths = np.array([row.petal_length for row in rows], dtype=float)
+    petal_widths = np.array([row.petal_width for row in rows], dtype=float)
+    for row in rows:
+        if row.species == species:
+            return np.array(
+                [
+                    (row.petal_length - petal_lengths.min())
+                    / (petal_lengths.max() - petal_lengths.min()),
+                    (row.petal_width - petal_widths.min())
+                    / (petal_widths.max() - petal_widths.min()),
+                ],
+                dtype=float,
+            )
+    raise ValueError(f"Could not find species {species!r} in dataset")
 
 
 def evaluate_tiny_iris_model(x: np.ndarray) -> np.ndarray:
@@ -147,8 +197,12 @@ def main() -> None:
 
     if not MODEL_PATH.exists():
         raise SystemExit(f"Missing model file: {MODEL_PATH}")
+    if not DATASET_PATH.exists():
+        raise SystemExit(f"Missing dataset file: {DATASET_PATH}")
 
-    logits = evaluate_tiny_iris_model(SETOSA_SAMPLE)
+    dataset = load_iris_dataset(DATASET_PATH)
+    setosa_sample = normalized_petal_features(dataset, "setosa")
+    logits = evaluate_tiny_iris_model(setosa_sample)
     target_class = int(np.argmax(logits))
     rival_classes = [idx for idx in range(len(CLASS_NAMES)) if idx != target_class]
 
@@ -156,7 +210,7 @@ def main() -> None:
         run_counterexample_query(
             target_class=target_class,
             rival_class=rival_class,
-            center=SETOSA_SAMPLE,
+            center=setosa_sample,
             epsilon=args.epsilon,
             timeout=args.timeout,
         )
@@ -166,8 +220,10 @@ def main() -> None:
 
     result = {
         "model": str(MODEL_PATH.relative_to(ROOT)),
-        "dataset": "Iris, using normalized petal length and petal width",
-        "center_input": SETOSA_SAMPLE.tolist(),
+        "dataset": str(DATASET_PATH.relative_to(ROOT)),
+        "dataset_rows": len(dataset),
+        "features": "normalized petal length and petal width",
+        "center_input": setosa_sample.tolist(),
         "epsilon": args.epsilon,
         "center_logits": logits.tolist(),
         "center_prediction": CLASS_NAMES[target_class],
