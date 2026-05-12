@@ -71,6 +71,19 @@ def _stats_total_time(stats: Any, fallback_seconds: float) -> float:
     return fallback_seconds
 
 
+def _solve_network(network: Any, options: Any) -> tuple[str, Dict[int, float], Any]:
+    """Support Maraboupy versions that return either 2 or 3 solve values."""
+    result = network.solve(verbose=False, options=options)
+    if len(result) == 3:
+        exit_code, vals, stats = result
+    elif len(result) == 2:
+        vals, stats = result
+        exit_code = "sat" if len(vals) > 0 else "unsat"
+    else:
+        raise RuntimeError(f"Unexpected Marabou solve result: {result!r}")
+    return str(exit_code).lower(), vals, stats
+
+
 def run_counterexample_query(
     target_class: int,
     rival_class: int,
@@ -100,9 +113,10 @@ def run_counterexample_query(
 
     options = Marabou.createOptions(verbosity=0, timeoutInSeconds=timeout)
     started = time.perf_counter()
-    vals, stats = network.solve(verbose=False, options=options)
+    exit_code, vals, stats = _solve_network(network, options)
     elapsed = time.perf_counter() - started
-    is_sat = len(vals) > 0
+    is_sat = exit_code == "sat"
+    status = exit_code.upper()
 
     counterexample = None
     if is_sat:
@@ -117,7 +131,7 @@ def run_counterexample_query(
     return {
         "rival_class": CLASS_NAMES[rival_class],
         "query": f"exists x in L_inf ball: y_{CLASS_NAMES[rival_class]} >= y_{CLASS_NAMES[target_class]}",
-        "status": "SAT" if is_sat else "UNSAT",
+        "status": status,
         "runtime_seconds": _stats_total_time(stats, elapsed),
         "input_lower_bounds": lower.tolist(),
         "input_upper_bounds": upper.tolist(),
@@ -175,4 +189,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

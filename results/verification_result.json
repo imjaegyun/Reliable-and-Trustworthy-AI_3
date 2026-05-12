@@ -1,0 +1,49 @@
+{
+  "model": "models/iris_tiny.nnet",
+  "dataset": "Iris, using normalized petal length and petal width",
+  "center_input": [
+    0.0677966102,
+    0.0416666667
+  ],
+  "epsilon": 0.04,
+  "center_logits": [
+    1.6716101693,
+    0.3772598871,
+    -0.8072033896999999
+  ],
+  "center_prediction": "setosa",
+  "property": "All inputs within the L-infinity ball around the Setosa sample keep the Setosa logit strictly above both non-Setosa logits.",
+  "verified": true,
+  "queries": [
+    {
+      "rival_class": "versicolor",
+      "query": "exists x in L_inf ball: y_versicolor >= y_setosa",
+      "status": "UNSAT",
+      "runtime_seconds": 0.0005681300535798073,
+      "input_lower_bounds": [
+        0.027796610199999995,
+        0.0016666666999999996
+      ],
+      "input_upper_bounds": [
+        0.1077966102,
+        0.0816666667
+      ],
+      "counterexample": null
+    },
+    {
+      "rival_class": "virginica",
+      "query": "exists x in L_inf ball: y_virginica >= y_setosa",
+      "status": "UNSAT",
+      "runtime_seconds": 0.00028523197397589684,
+      "input_lower_bounds": [
+        0.027796610199999995,
+        0.0016666666999999996
+      ],
+      "input_upper_bounds": [
+        0.1077966102,
+        0.0816666667
+      ],
+      "counterexample": null
+    }
+  ]
+}

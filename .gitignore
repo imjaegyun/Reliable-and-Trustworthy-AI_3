@@ -5,4 +5,5 @@ marabou.log
 results/*.json
 results/*.txt
 !results/.gitkeep
+!results/verification_result.json
 assignment3.pdf
