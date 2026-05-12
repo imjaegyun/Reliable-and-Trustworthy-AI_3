@@ -14,31 +14,34 @@ and Trustworthy Artificial Intelligence Assignment 3.
 - `resources_exploration.md`: summary of the Marabou `resources` directory.
 - `report.pdf`: short assignment report.
 
-## Setup
+## Setup with Conda
 
-The recommended Marabou installation method is pip:
+The repository is set up to run with a conda environment:
 
 ```bash
-python -m pip install -r requirements.txt
+conda env create -f environment.yml
+conda activate assignment3-marabou
 ```
 
-Marabou's README says this installs both the `Marabou` executable and the
-Python bindings. The current Python interface supports Python 3.8 through 3.11.
+You can also let the helper script create or reuse the environment:
+
+```bash
+./run_all.sh
+```
 
 ## Run
 
 ```bash
-python test.py
+./run_all.sh
 ```
 
 Optional:
 
 ```bash
-python test.py --epsilon 0.04 --timeout 30
+./run_all.sh --epsilon 0.04 --timeout 30
 ```
 
 The script runs two Marabou queries. Each query asks whether one non-Setosa
 class can tie or beat the Setosa logit inside the input perturbation box. If
 both queries return `UNSAT`, the local robustness property is verified for this
 epsilon.
-
