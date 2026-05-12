@@ -19,7 +19,7 @@
       "rival_class": "versicolor",
       "query": "exists x in L_inf ball: y_versicolor >= y_setosa",
       "status": "UNSAT",
-      "runtime_seconds": 0.0005681300535798073,
+      "runtime_seconds": 0.0003945371136069298,
       "input_lower_bounds": [
         0.027796610199999995,
         0.0016666666999999996
@@ -34,7 +34,7 @@
       "rival_class": "virginica",
       "query": "exists x in L_inf ball: y_virginica >= y_setosa",
       "status": "UNSAT",
-      "runtime_seconds": 0.00028523197397589684,
+      "runtime_seconds": 0.00020476803183555603,
       "input_lower_bounds": [
         0.027796610199999995,
         0.0016666666999999996
